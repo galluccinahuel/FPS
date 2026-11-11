@@ -1,0 +1,133 @@
+﻿// Copyright Gallucci Nahuel.
+
+
+#include "Combat/CombatComponent.h"
+
+#include "Net/UnrealNetwork.h"
+#include "Weapon/Weapon.h"
+
+
+UCombatComponent::UCombatComponent()
+{
+
+	PrimaryComponentTick.bCanEverTick = true;
+}
+
+void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+}
+
+void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(UCombatComponent, Inventory);
+	DOREPLIFETIME(UCombatComponent, CurrentWeapon);
+	DOREPLIFETIME_CONDITION(UCombatComponent, bAiming, COND_SkipOwner);
+}
+
+void UCombatComponent::Initiate_CycleWeapon()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Cycle Weapon"));
+}
+
+void UCombatComponent::Initiate_FireWeapon_Pressed()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Fire Weapon Pressed"));
+}
+
+void UCombatComponent::Initiate_FireWeapon_Released()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Fire Weapon Released"));
+}
+
+void UCombatComponent::Initiate_ReloadWeapon()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Reload Weapon"));
+}
+
+void UCombatComponent::Initiate_Aim_Pressed()
+{
+	Local_Aim(true);
+	Server_Aim(bAiming);
+	
+}
+
+void UCombatComponent::Initiate_Aim_Released()
+{
+	Local_Aim(false);
+	Server_Aim(bAiming);
+}
+
+void UCombatComponent::Server_Aim_Implementation(bool bPressed)
+{
+	Local_Aim(bPressed);
+}
+
+void UCombatComponent::Local_Aim(bool bPressed)
+{
+	bAiming = bPressed;
+}
+
+
+void UCombatComponent::Equip(AWeapon* Weapon)
+{
+	CurrentWeapon = Weapon;
+	CurrentWeapon->AttachToOwningPawn();
+}
+
+void UCombatComponent::SpawnInventory()
+{
+	if (GetOwner()->GetLocalRole() < ROLE_Authority) return;
+
+	for (TSubclassOf<AWeapon>& WeaponClass : DefaultWeaponClasses)
+	{
+		AWeapon* NewWeapon = SpawnWeapon(WeaponClass);
+		
+		Inventory.AddUnique(NewWeapon);
+	}
+	
+	if (Inventory.Num() > 0)
+	{
+		Equip(Inventory[0]);
+	}
+}
+
+void UCombatComponent::DestroyInventory()
+{
+	for (AWeapon* Weapon : Inventory)
+	{
+		if (IsValid(Weapon))
+		{
+			Weapon->Destroy();
+		}
+	}
+}
+
+
+void UCombatComponent::OnRep_CurrentWeapon(AWeapon* LastWeapon)
+{
+	if (!IsValid(CurrentWeapon)) return;
+	
+	CurrentWeapon->AttachToOwningPawn();
+}
+
+AWeapon* UCombatComponent::SpawnWeapon(TSubclassOf<AWeapon> WeaponClass) const
+{
+	AActor* OwningActor = GetOwner();
+	
+	if (!IsValid(OwningActor)) return nullptr;
+	
+	if (OwningActor->GetLocalRole() < ROLE_Authority) return nullptr;
+	
+	FActorSpawnParameters SpawnParams;
+	
+	SpawnParams.Instigator = Cast<APawn>(OwningActor);
+	SpawnParams.Owner = OwningActor;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	
+	return GetWorld()->SpawnActor<AWeapon>(WeaponClass, SpawnParams);
+	
+}
+

@@ -1,0 +1,44 @@
+# ============================================
+# UNREAL ENGINE - Carpetas Temporales y Caches
+# ============================================
+Binaries/
+Content/
+Build/
+DerivedDataCache/
+Intermediate/
+Saved/
+Script/
+.idea/
+.vs/
+.vscode/
+
+# Ejecutables y binarios compilados
+*.exe
+*.target.json
+
+# ============================================
+# JETBRAINS RIDER / VISUAL STUDIO
+# ============================================
+.idea/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.suo
+*.opensdf
+*.sdf
+*.db
+*.opendb
+
+# ============================================
+# ARCHIVOS PROPIOS DEL SISTEMA / OTROS
+# ============================================
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.bak
+
+# Archivos de volcado de memoria (Crash Dumps)
+*.dmp
+*.crash
