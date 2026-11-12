@@ -48,11 +48,6 @@ public:
 	UPROPERTY(BlueprintReadOnly, replicated)
 	bool bAiming;
 	
-	UFUNCTION(Server, Reliable)
-	void Server_Aim(bool bPressed);
-	
-	void Local_Aim(bool bPressed);
-	
 	AWeapon* GetCurrentWeapon() const { return CurrentWeapon; }
 	
 protected:
@@ -72,6 +67,19 @@ private:
 	TArray<TSubclassOf<AWeapon>> DefaultWeaponClasses;
 	
 	AWeapon* SpawnWeapon(TSubclassOf<AWeapon> WeaponClass) const;
+	
+	UFUNCTION(Server, Reliable)
+	void Server_Aim(bool bPressed);
+	
+	void Local_Aim(bool bPressed);
+	
+	UFUNCTION(Server, Reliable)
+	void Server_FireWeapon();
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_FireWeapon();
+	
+	void Local_FireWeapon();
 	
 
 };
