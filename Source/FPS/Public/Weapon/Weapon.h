@@ -18,9 +18,13 @@ public:
 	AWeapon();
 	virtual void OnRep_Instigator() override;
 	
-	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
+	//weapon mesh: 1st person view
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TObjectPtr<USkeletalMeshComponent> Mesh1P;
 	
-	USkeletalMeshComponent* GetMesh3P() const { return Mesh3P; }
+	//weapon mesh: 3rd person view
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TObjectPtr<USkeletalMeshComponent> Mesh3P;
 	
 	void AttachToOwningPawn() const;
 	
@@ -47,13 +51,7 @@ protected:
 
 private:
 	
-	//weapon mesh: 1st person view
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USkeletalMeshComponent> Mesh1P;
-	
-	//weapon mesh: 3rd person view
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USkeletalMeshComponent> Mesh3P;
+
 	
 	void SetMeshVisibilities(APawn* OwningPawn) const;
 	

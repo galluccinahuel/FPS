@@ -93,9 +93,9 @@ void AShooterCharacter::Tick(float DeltaTime)
 
 void AShooterCharacter::CalculateFABRIKSocketTransform()
 {
-	if (IsValid(CombatComponent) && IsValid(CombatComponent->GetCurrentWeapon()) && IsValid(CombatComponent->GetCurrentWeapon()->GetMesh3P()))
+	if (IsValid(CombatComponent) && IsValid(CombatComponent->GetCurrentWeapon()) && IsValid(CombatComponent->GetCurrentWeapon()->Mesh3P))
 	{
-		FABRIK_SocketTransform = CombatComponent->GetCurrentWeapon()->GetMesh3P()->GetSocketTransform("FABRIK_Socket", RTS_World);
+		FABRIK_SocketTransform = CombatComponent->GetCurrentWeapon()->Mesh3P->GetSocketTransform("FABRIK_Socket", RTS_World);
 		
 		FVector OutLocation;
 		FRotator OutRotation;
