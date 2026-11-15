@@ -27,12 +27,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FPS|WeaponType")
 	FGameplayTag WeaponType;
 	
+	void WeaponTrace(FHitResult& OutHit, float TraceLength);
+	
 protected:
 
 	virtual void BeginPlay() override;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "FPS|Aiming")
 	float AimFOV;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "FPS|Aiming")
+	float TraceRadius = 5.f;
+
 
 private:
 	

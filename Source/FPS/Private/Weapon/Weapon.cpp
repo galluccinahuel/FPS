@@ -3,7 +3,10 @@
 
 #include "Weapon/Weapon.h"
 
+#include "KismetTraceUtils.h"
+#include "FPS/FPS.h"
 #include "Interfaces/PlayerInterface.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 AWeapon::AWeapon()
@@ -30,6 +33,14 @@ AWeapon::AWeapon()
 	AimFOV = 65.f;
 	
 }
+
+
+void AWeapon::BeginPlay()
+{
+	Super::BeginPlay();
+	
+}
+
 
 void AWeapon::OnRep_Instigator()
 {
@@ -58,10 +69,57 @@ void AWeapon::AttachToOwningPawn() const
 	
 }
 
-void AWeapon::BeginPlay()
+void AWeapon::WeaponTrace(FHitResult& OutHit, float TraceLength)
 {
-	Super::BeginPlay();
 	
+	FCollisionQueryParams QueryParams;
+	QueryParams.bReturnPhysicalMaterial = true;
+	QueryParams.AddIgnoredActor(this);
+	QueryParams.AddIgnoredActor(GetOwner());
+	
+	FCollisionResponseParams ResponseParams;	
+	ResponseParams.CollisionResponse.SetAllChannels(ECR_Ignore);
+	ResponseParams.CollisionResponse.SetResponse(ECC_WorldStatic, ECR_Block);
+	ResponseParams.CollisionResponse.SetResponse(ECC_Pawn, ECR_Block);
+	ResponseParams.CollisionResponse.SetResponse(ECC_WorldDynamic, ECR_Block);
+	ResponseParams.CollisionResponse.SetResponse(ECC_PhysicsBody, ECR_Block);
+	
+	ensure(GetInstigator());
+	
+	APlayerController* PC = Cast<APlayerController>(GetInstigator()->GetController());
+	if (!IsValid(PC)) return;
+	
+	FVector EyesWorldLocation;
+	FRotator EyesWorldRotation;
+	PC->GetPlayerViewPoint(EyesWorldLocation, EyesWorldRotation);
+	const FVector EyesWorldDirection = UKismetMathLibrary::GetForwardVector(EyesWorldRotation);
+	
+	FVector Start = EyesWorldLocation;
+	FVector End = Start + (EyesWorldDirection * TraceLength);
+	
+	const bool bHit = GetWorld()->SweepSingleByChannel(
+		OutHit,
+		Start,
+		End,
+		FQuat::Identity,
+		FPSTraceChannels::ECC_Weapon,
+		FCollisionShape::MakeSphere(TraceRadius),
+		QueryParams,
+		ResponseParams
+		);
+		
+	DrawDebugSphereTraceSingle(
+		GetWorld(),
+		Start,
+		End,
+		TraceRadius,
+		EDrawDebugTrace::ForDuration,
+		bHit,
+		OutHit,
+		FLinearColor::Green,
+		FLinearColor::Red,
+		1.f
+	);
 }
 
 void AWeapon::SetMeshVisibilities(APawn* OwningPawn) const

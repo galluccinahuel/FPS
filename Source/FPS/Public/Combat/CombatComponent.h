@@ -52,8 +52,11 @@ public:
 	
 protected:
 	
-		UPROPERTY(Transient, BlueprintReadOnly ,ReplicatedUsing= OnRep_CurrentWeapon)
-    	TObjectPtr<AWeapon> CurrentWeapon;
+	UPROPERTY(Transient, BlueprintReadOnly ,ReplicatedUsing= OnRep_CurrentWeapon)
+	TObjectPtr<AWeapon> CurrentWeapon;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "FPS|Weapon")
+	float TraceLength = 10000.f;		
 	
 private:
 	
@@ -81,5 +84,4 @@ private:
 	
 	void Local_FireWeapon();
 	
-
 };
