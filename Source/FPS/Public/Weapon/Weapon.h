@@ -29,9 +29,14 @@ public:
 	
 	void WeaponTrace(FHitResult& OutHit, float TraceLength);
 	
+	void Local_Fire(const FVector& ImpactPoint, const FVector& ImpactNormal, TEnumAsByte<EPhysicalSurface> ImpactSurfaceType, bool bIsFirstPerson);
+	
 protected:
-
+	
 	virtual void BeginPlay() override;
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void FireEffects(const FVector& ImpactPoint, const FVector& ImpactNormal, EPhysicalSurface ImpactSurfaceType, bool bIsFirstPerson);	
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "FPS|Aiming")
 	float AimFOV;
