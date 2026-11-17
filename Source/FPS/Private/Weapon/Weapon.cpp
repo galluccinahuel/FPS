@@ -32,6 +32,8 @@ AWeapon::AWeapon()
 	
 	AimFOV = 65.f;
 	
+	FireTime = 0.1f;
+	
 }
 
 

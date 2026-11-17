@@ -15,6 +15,12 @@ UCombatComponent::UCombatComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 	
 	TraceLength = 20000.f;
+	
+	bAiming = false;
+	
+	bTriggerPressed = false;
+	
+	
 }
 
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -38,12 +44,13 @@ void UCombatComponent::Initiate_CycleWeapon()
 
 void UCombatComponent::Initiate_FireWeapon_Pressed()
 {
+	bTriggerPressed = true;
 	Local_FireWeapon();
 }
 
 void UCombatComponent::Initiate_FireWeapon_Released()
 {
-	
+	bTriggerPressed = false;
 }
 
 //local_firewapon()
@@ -63,10 +70,9 @@ void UCombatComponent::Local_FireWeapon()
 	if (!IsValid(CurrentWeapon)) return;
 	
 	ensure(IsValid(WeaponData));
+	
 	UAnimMontage* Montage1P = WeaponData->FirstPersonMontages.FindChecked(CurrentWeapon->WeaponType).FireMontage;
-	
 	USkeletalMeshComponent* Mesh1P = IPlayerInterface::Execute_GetMesh1P(GetOwner());
-	
 	if (IsValid(Mesh1P) && IsValid(Montage1P))
 	{
 		Mesh1P->GetAnimInstance()->Montage_Play(Montage1P);
@@ -79,8 +85,20 @@ void UCombatComponent::Local_FireWeapon()
 	EPhysicalSurface ImpactSurfaceType = Hit.PhysMaterial.IsValid(false) ? Hit.PhysMaterial->SurfaceType.GetValue() : SurfaceType1;
 	
 	CurrentWeapon->Local_Fire(Hit.ImpactPoint, Hit.ImpactNormal, ImpactSurfaceType, true);
+	
+	GetWorld()->GetTimerManager().SetTimer(FireTimer, this, &UCombatComponent::FireTimerFinished, CurrentWeapon->FireTime);
 		
 	Server_FireWeapon(Hit);
+}
+
+void UCombatComponent::FireTimerFinished()
+{
+	if (!IsValid(CurrentWeapon)) return;
+	
+	if (bTriggerPressed && CurrentWeapon->FireType == EFireType::Automatic)
+	{
+		Local_FireWeapon();
+	}
 }
 
 void UCombatComponent::Server_FireWeapon_Implementation(const FHitResult& Hit)

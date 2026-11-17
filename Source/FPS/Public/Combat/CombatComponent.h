@@ -84,4 +84,10 @@ private:
 	
 	void Local_FireWeapon();
 	
+	bool bTriggerPressed;
+	
+	FTimerHandle FireTimer;
+	
+	void FireTimerFinished();
+	
 };
